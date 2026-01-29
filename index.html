@@ -13,46 +13,81 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        /* Thiết lập tràn màn hình, sửa lỗi iPhone */
         html, body { 
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
             overflow: hidden; 
             background-color: #f0f2f5; 
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            font-family: 'Montserrat', sans-serif;
         }
 
-        /* Logo nằm giữa màn hình lúc chờ */
+        /* Màn hình chào */
+        #welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            transition: opacity 0.5s ease;
+        }
+
         .startup-logo {
-            width: 100px; 
+            width: 120px; 
             height: auto;
             object-fit: contain;
-            opacity: 0.8;
-            animation: pulse 2s infinite ease-in-out;
-            z-index: 1; 
+            margin-bottom: 30px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
         }
 
-        /* Hiệu ứng logo thở */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
+        /* Nút bấm kích hoạt - Chìa khóa để iPhone mở cửa */
+        .btn-start {
+            background: #356854; /* Xanh Kati */
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(53, 104, 84, 0.3);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseBtn 2s infinite;
+            transition: transform 0.2s;
+        }
+        .btn-start:active { transform: scale(0.95); }
+
+        @keyframes pulseBtn {
+            0% { box-shadow: 0 0 0 0 rgba(53, 104, 84, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(53, 104, 84, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(53, 104, 84, 0); }
         }
         
         iframe { 
-            width: 100%; height: 100%; border: none; 
-            display: block; position: absolute;
+            width: 100%; height: 100%; 
+            border: none; 
+            display: none; /* Ẩn đi lúc đầu */
+            position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 10; 
+            background: #fff;
         }
     </style>
 </head>
 <body>
 
-    <img src="logo.png" alt="KATI STUDIO" class="startup-logo">
+    <div id="welcome-screen">
+        <img src="logo.png" alt="KATI STUDIO" class="startup-logo">
+        <button class="btn-start" onclick="startApp()">XEM THÔNG TIN</button>
+        <p style="margin-top: 15px; color: #888; font-size: 0.8rem;">Hệ thống hợp đồng online</p>
+    </div>
 
     <iframe 
         id="mainFrame" 
@@ -62,20 +97,44 @@
     ></iframe>
 
     <script>
-        // LINK GOOGLE GỐC CỦA BẠN
+        // LINK GOOGLE GỐC
         const LINK_GOOGLE_GOC = "https://script.google.com/macros/s/AKfycbwx48cWA84d4e2Iw31ViBpZSo-cNC8YP2UTD0KpOhCV7_WLw2aFwjDdm2mbmm5IkWNb/exec"; 
 
-        function loadApp() {
+        function startApp() {
+            // 1. Hiệu ứng bấm nút
+            var btn = document.querySelector('.btn-start');
+            btn.innerText = "ĐANG KẾT NỐI...";
+            btn.style.background = "#ccc";
+            btn.style.animation = "none";
+
+            // 2. Lấy tham số
             var params = window.location.search; 
             if (!params.includes("page=")) {
                 var prefix = params ? "&" : "?";
                 params += prefix + "page=kyonline";
             }
-            // Thêm timestamp để ép Zalo tải mới
+            // Thêm timestamp chống cache
             var timestamp = "&t=" + new Date().getTime();
-            document.getElementById("mainFrame").src = LINK_GOOGLE_GOC + params + timestamp;
+
+            // 3. Kích hoạt Iframe
+            var iframe = document.getElementById("mainFrame");
+            iframe.src = LINK_GOOGLE_GOC + params + timestamp;
+            
+            // 4. Khi Iframe tải xong thì hiện lên
+            iframe.onload = function() {
+                document.getElementById("welcome-screen").style.display = 'none';
+                iframe.style.display = 'block';
+            };
+
+            // Fallback: Tự hiện sau 2s nếu mạng nhanh quá onload không kịp bắt
+            setTimeout(function() {
+                document.getElementById("welcome-screen").style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById("welcome-screen").style.display = 'none';
+                    iframe.style.display = 'block';
+                }, 500);
+            }, 1500);
         }
-        loadApp();
     </script>
 </body>
 </html>
