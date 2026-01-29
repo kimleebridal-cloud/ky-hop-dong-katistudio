@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KATI STUDIO - KÝ HỢP ĐỒNG ONLINE</title>
+    <title>KATI STUDIO - HỆ THỐNG KÝ ONLINE</title>
     
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="shortcut icon" href="logo.png" type="image/png">
@@ -28,7 +28,6 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* Màn hình chào */
         #welcome-screen {
             display: flex;
             flex-direction: column;
@@ -36,6 +35,7 @@
             justify-content: center;
             z-index: 20;
             transition: opacity 0.5s ease;
+            width: 100%;
         }
 
         .startup-logo {
@@ -46,9 +46,8 @@
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
         }
 
-        /* Nút bấm kích hoạt - Chìa khóa để iPhone mở cửa */
         .btn-start {
-            background: #356854; /* Xanh Kati */
+            background: #356854; 
             color: white;
             border: none;
             padding: 15px 40px;
@@ -61,6 +60,9 @@
             letter-spacing: 1px;
             animation: pulseBtn 2s infinite;
             transition: transform 0.2s;
+            /* Fix lỗi bấm nút trên iOS */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         .btn-start:active { transform: scale(0.95); }
 
@@ -73,11 +75,11 @@
         iframe { 
             width: 100%; height: 100%; 
             border: none; 
-            display: none; /* Ẩn đi lúc đầu */
+            display: none; 
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 10; 
-            background: #fff;
+            background: #356854; /* Nền xanh để không bị nháy trắng */
         }
     </style>
 </head>
@@ -85,14 +87,14 @@
 
     <div id="welcome-screen">
         <img src="logo.png" alt="KATI STUDIO" class="startup-logo">
-        <button class="btn-start" onclick="startApp()">XEM THÔNG TIN</button>
+        <button class="btn-start" onclick="startApp()">BẮT ĐẦU KÝ TÊN</button>
         <p style="margin-top: 15px; color: #888; font-size: 0.8rem;">Hệ thống hợp đồng online</p>
     </div>
 
     <iframe 
         id="mainFrame" 
         title="Kati Studio App"
-        sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation"
+        sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation allow-storage-access-by-user-activation"
         allow="camera; microphone; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     ></iframe>
 
@@ -101,39 +103,30 @@
         const LINK_GOOGLE_GOC = "https://script.google.com/macros/s/AKfycbwx48cWA84d4e2Iw31ViBpZSo-cNC8YP2UTD0KpOhCV7_WLw2aFwjDdm2mbmm5IkWNb/exec"; 
 
         function startApp() {
-            // 1. Hiệu ứng bấm nút
             var btn = document.querySelector('.btn-start');
             btn.innerText = "ĐANG KẾT NỐI...";
             btn.style.background = "#ccc";
             btn.style.animation = "none";
+            btn.disabled = true; // Chặn bấm liên tục
 
-            // 2. Lấy tham số
             var params = window.location.search; 
             if (!params.includes("page=")) {
                 var prefix = params ? "&" : "?";
                 params += prefix + "page=kyonline";
             }
-            // Thêm timestamp chống cache
             var timestamp = "&t=" + new Date().getTime();
 
-            // 3. Kích hoạt Iframe
             var iframe = document.getElementById("mainFrame");
+            // Hiển thị khung trước để iOS nhận diện luồng
+            iframe.style.display = 'block'; 
+            
+            // Set Link
             iframe.src = LINK_GOOGLE_GOC + params + timestamp;
             
-            // 4. Khi Iframe tải xong thì hiện lên
-            iframe.onload = function() {
-                document.getElementById("welcome-screen").style.display = 'none';
-                iframe.style.display = 'block';
-            };
-
-            // Fallback: Tự hiện sau 2s nếu mạng nhanh quá onload không kịp bắt
+            // Ẩn màn hình chào sau 1s (tạo cảm giác mượt)
             setTimeout(function() {
-                document.getElementById("welcome-screen").style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById("welcome-screen").style.display = 'none';
-                    iframe.style.display = 'block';
-                }, 500);
-            }, 1500);
+                document.getElementById("welcome-screen").style.display = 'none';
+            }, 1000);
         }
     </script>
 </body>
