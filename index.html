@@ -4,47 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KATI STUDIO - KÝ HỢP ĐỒNG ONLINE</title>
-
-<link rel="icon" href="logo.png" type="image/png">
-    <link rel="shortcut icon" href="logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" href="logo.png" type="image/png">
+    
     <style>
-        /* Thiết lập tràn màn hình, không có viền */
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #f0f2f5; }
-        iframe { width: 100%; height: 100%; border: none; display: block; }
+        /* FIX CHO IOS: Sử dụng -webkit-overflow-scrolling và 100dvh */
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            height: 100dvh; /* Dynamic view height cho mobile */
+            overflow: hidden; 
+            background-color: #f0f2f5; 
+        }
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            display: block;
+            /* Tăng tốc độ render trên iOS */
+            -webkit-overflow-scrolling: touch; 
+        }
     </style>
 </head>
 <body>
-    <iframe id="mainFrame" title="Kati Studio App"></iframe>
+    <iframe 
+        id="mainFrame" 
+        title="Kati Studio App"
+        sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation"
+    ></iframe>
 
     <script>
-        // =======================================================================
-        // 🔴 QUAN TRỌNG: DÁN LINK GOOGLE CỦA BẠN VÀO GIỮA 2 DẤU NHÁY DƯỚI ĐÂY
-        // Link phải có đuôi /exec
-        // =======================================================================
         const LINK_GOOGLE_GOC = "https://script.google.com/macros/s/AKfycbwx48cWA84d4e2Iw31ViBpZSo-cNC8YP2UTD0KpOhCV7_WLw2aFwjDdm2mbmm5IkWNb/exec"; 
-        // =======================================================================
 
-        // Logic giữ nguyên tham số URL (stt, thang, key, page...)
-        // Giúp link Vercel hoạt động y hệt link Google
         function loadApp() {
-            // Lấy toàn bộ tham số sau dấu ? của link Vercel (VD: ?page=kyonline&stt=1...)
             var params = window.location.search; 
             
-            // Nếu link Vercel chưa có tham số page, ta có thể tự thêm mặc định là kyonline
-            // (Tùy chọn: Nếu bạn muốn link gốc vào thẳng trang ký luôn)
+            // Logic ghép tham số
             if (!params.includes("page=")) {
                 var prefix = params ? "&" : "?";
                 params += prefix + "page=kyonline";
             }
 
-            // Gán link hoàn chỉnh vào Iframe
             var finalLink = LINK_GOOGLE_GOC + params;
+            
+            // Log ra để kiểm tra nếu cần
+            console.log("Loading URL:", finalLink);
+            
             document.getElementById("mainFrame").src = finalLink;
         }
 
+        // Chạy ngay lập tức
         loadApp();
     </script>
 </body>
 </html>
-
