@@ -3,15 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KATI STUDIO - HỆ THỐNG KÝ ONLINE</title>
+    <title>KATI STUDIO - KÝ HỢP ĐỒNG ONLINE</title>
     
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="shortcut icon" href="logo.png" type="image/png">
     <link rel="apple-touch-icon" href="logo.png">
-
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -19,7 +15,6 @@
         html, body { 
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
-            overflow: hidden; 
             background-color: #f0f2f5; 
             display: flex;
             flex-direction: column;
@@ -33,101 +28,92 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 20;
-            transition: opacity 0.5s ease;
             width: 100%;
+            padding: 20px;
+            text-align: center;
         }
 
         .startup-logo {
-            width: 120px; 
+            width: 130px; 
             height: auto;
             object-fit: contain;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
 
         .btn-start {
-            background: #356854; 
+            background: linear-gradient(135deg, #356854, #4e8c72); 
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1rem;
+            padding: 18px 50px;
+            font-size: 1.1rem;
             font-weight: 700;
             border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(53, 104, 84, 0.3);
+            box-shadow: 0 10px 25px rgba(53, 104, 84, 0.4);
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            animation: pulseBtn 2s infinite;
-            transition: transform 0.2s;
-            /* Fix lỗi bấm nút trên iOS */
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-        .btn-start:active { transform: scale(0.95); }
-
-        @keyframes pulseBtn {
-            0% { box-shadow: 0 0 0 0 rgba(53, 104, 84, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(53, 104, 84, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(53, 104, 84, 0); }
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            width: 100%;
+            max-width: 300px;
         }
         
-        iframe { 
-            width: 100%; height: 100%; 
-            border: none; 
-            display: none; 
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 10; 
-            background: #356854; /* Nền xanh để không bị nháy trắng */
-        }
+        .btn-start:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(53, 104, 84, 0.4); }
+
+        .note { margin-top: 20px; color: #999; font-size: 0.8rem; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <div id="welcome-screen">
         <img src="logo.png" alt="KATI STUDIO" class="startup-logo">
-        <button class="btn-start" onclick="startApp()">BẮT ĐẦU KÝ TÊN</button>
-        <p style="margin-top: 15px; color: #888; font-size: 0.8rem;">Hệ thống hợp đồng online</p>
+        
+        <button class="btn-start" onclick="openApp()">XEM THÔNG TIN HỢP ĐỒNG</button>
+        
+        <p class="note">Hệ thống hợp đồng online KATI STUDIO</p>
     </div>
-
-    <iframe 
-        id="mainFrame" 
-        title="Kati Studio App"
-        sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation allow-storage-access-by-user-activation"
-        allow="camera; microphone; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    ></iframe>
 
     <script>
         // LINK GOOGLE GỐC
         const LINK_GOOGLE_GOC = "https://script.google.com/macros/s/AKfycbwx48cWA84d4e2Iw31ViBpZSo-cNC8YP2UTD0KpOhCV7_WLw2aFwjDdm2mbmm5IkWNb/exec"; 
 
-        function startApp() {
+        function openApp() {
+            // 1. Hiệu ứng loading nút
             var btn = document.querySelector('.btn-start');
-            btn.innerText = "ĐANG KẾT NỐI...";
-            btn.style.background = "#ccc";
-            btn.style.animation = "none";
-            btn.disabled = true; // Chặn bấm liên tục
+            btn.innerHTML = 'ĐANG KẾT NỐI <span id="dot">...</span>';
+            btn.style.opacity = "0.8";
+            btn.style.pointerEvents = "none"; // Khóa nút
 
+            // 2. Xử lý Link
             var params = window.location.search; 
             if (!params.includes("page=")) {
                 var prefix = params ? "&" : "?";
                 params += prefix + "page=kyonline";
             }
-            var timestamp = "&t=" + new Date().getTime();
-
-            var iframe = document.getElementById("mainFrame");
-            // Hiển thị khung trước để iOS nhận diện luồng
-            iframe.style.display = 'block'; 
             
-            // Set Link
-            iframe.src = LINK_GOOGLE_GOC + params + timestamp;
-            
-            // Ẩn màn hình chào sau 1s (tạo cảm giác mượt)
+            // 3. CHUYỂN HƯỚNG TRỰC TIẾP (GIẢI PHÁP TRIỆT ĐỂ)
+            // Thay vì nhúng Iframe, ta điều hướng trình duyệt sang thẳng Google
+            // Cách này iPhone KHÔNG THỂ CHẶN được.
             setTimeout(function() {
-                document.getElementById("welcome-screen").style.display = 'none';
-            }, 1000);
+                window.location.href = LINK_GOOGLE_GOC + params;
+            }, 300); // Delay nhẹ 0.3s để khách thấy hiệu ứng bấm nút
         }
+        
+        // Hiệu ứng dấu chấm chạy chạy
+        setInterval(() => {
+            var dot = document.getElementById('dot');
+            if(dot) {
+                if(dot.innerText.length >= 3) dot.innerText = "";
+                else dot.innerText += ".";
+            }
+        }, 500);
     </script>
 </body>
 </html>
