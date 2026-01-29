@@ -3,117 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KATI STUDIO - KÝ HỢP ĐỒNG ONLINE</title>
-    
-    <link rel="icon" href="logo.png" type="image/png">
+    <title>KATI STUDIO - HỆ THỐNG KÝ ONLINE</title>
+
+<link rel="icon" href="logo.png" type="image/png">
     <link rel="shortcut icon" href="logo.png" type="image/png">
     <link rel="apple-touch-icon" href="logo.png">
-
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
-        html, body { 
-            margin: 0; padding: 0; 
-            width: 100%; height: 100%; 
-            background-color: #f0f2f5; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        #welcome-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .startup-logo {
-            width: 130px; 
-            height: auto;
-            object-fit: contain;
-            margin-bottom: 40px;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .btn-start {
-            background: linear-gradient(135deg, #356854, #4e8c72); 
-            color: white;
-            border: none;
-            padding: 18px 50px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border-radius: 50px;
-            box-shadow: 0 10px 25px rgba(53, 104, 84, 0.4);
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s;
-            width: 100%;
-            max-width: 300px;
-        }
-        
-        .btn-start:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(53, 104, 84, 0.4); }
-
-        .note { margin-top: 20px; color: #999; font-size: 0.8rem; font-weight: 500; }
+        /* Thiết lập tràn màn hình, không có viền */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #f0f2f5; }
+        iframe { width: 100%; height: 100%; border: none; display: block; }
     </style>
 </head>
 <body>
-
-    <div id="welcome-screen">
-        <img src="logo.png" alt="KATI STUDIO" class="startup-logo">
-        
-        <button class="btn-start" onclick="openApp()">XEM THÔNG TIN HỢP ĐỒNG</button>
-        
-        <p class="note">Hệ thống hợp đồng online KATI STUDIO</p>
-    </div>
+    <iframe id="mainFrame" title="Kati Studio App"></iframe>
 
     <script>
-        // LINK GOOGLE GỐC
+        // =======================================================================
+        // 🔴 QUAN TRỌNG: DÁN LINK GOOGLE CỦA BẠN VÀO GIỮA 2 DẤU NHÁY DƯỚI ĐÂY
+        // Link phải có đuôi /exec
+        // =======================================================================
         const LINK_GOOGLE_GOC = "https://script.google.com/macros/s/AKfycbwx48cWA84d4e2Iw31ViBpZSo-cNC8YP2UTD0KpOhCV7_WLw2aFwjDdm2mbmm5IkWNb/exec"; 
+        // =======================================================================
 
-        function openApp() {
-            // 1. Hiệu ứng loading nút
-            var btn = document.querySelector('.btn-start');
-            btn.innerHTML = 'ĐANG KẾT NỐI <span id="dot">...</span>';
-            btn.style.opacity = "0.8";
-            btn.style.pointerEvents = "none"; // Khóa nút
-
-            // 2. Xử lý Link
+        // Logic giữ nguyên tham số URL (stt, thang, key, page...)
+        // Giúp link Vercel hoạt động y hệt link Google
+        function loadApp() {
+            // Lấy toàn bộ tham số sau dấu ? của link Vercel (VD: ?page=kyonline&stt=1...)
             var params = window.location.search; 
+            
+            // Nếu link Vercel chưa có tham số page, ta có thể tự thêm mặc định là kyonline
+            // (Tùy chọn: Nếu bạn muốn link gốc vào thẳng trang ký luôn)
             if (!params.includes("page=")) {
                 var prefix = params ? "&" : "?";
                 params += prefix + "page=kyonline";
             }
-            
-            // 3. CHUYỂN HƯỚNG TRỰC TIẾP (GIẢI PHÁP TRIỆT ĐỂ)
-            // Thay vì nhúng Iframe, ta điều hướng trình duyệt sang thẳng Google
-            // Cách này iPhone KHÔNG THỂ CHẶN được.
-            setTimeout(function() {
-                window.location.href = LINK_GOOGLE_GOC + params;
-            }, 300); // Delay nhẹ 0.3s để khách thấy hiệu ứng bấm nút
+
+            // Gán link hoàn chỉnh vào Iframe
+            var finalLink = LINK_GOOGLE_GOC + params;
+            document.getElementById("mainFrame").src = finalLink;
         }
-        
-        // Hiệu ứng dấu chấm chạy chạy
-        setInterval(() => {
-            var dot = document.getElementById('dot');
-            if(dot) {
-                if(dot.innerText.length >= 3) dot.innerText = "";
-                else dot.innerText += ".";
-            }
-        }, 500);
+
+        loadApp();
     </script>
 </body>
 </html>
