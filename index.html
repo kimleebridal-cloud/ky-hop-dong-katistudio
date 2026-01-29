@@ -3,31 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KATI STUDIO - KÝ HỢP ĐỒNG ONLINE</title>
+    <title>KATI STUDIO - ĐANG TẢI...</title>
     <link rel="icon" href="logo.png" type="image/png">
     
     <style>
-        /* FIX CHO IOS: Sử dụng -webkit-overflow-scrolling và 100dvh */
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
-            height: 100dvh; /* Dynamic view height cho mobile */
-            overflow: hidden; 
-            background-color: #f0f2f5; 
+        body, html { margin: 0; padding: 0; width: 100%; height: 100dvh; overflow: hidden; background-color: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        iframe { width: 100%; height: 100%; border: none; display: block; -webkit-overflow-scrolling: touch; }
+        
+        /* Màn hình hướng dẫn chung (Ẩn mặc định) */
+        .guide-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 99999; color: white; text-align: center;
         }
-        iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            display: block;
-            /* Tăng tốc độ render trên iOS */
-            -webkit-overflow-scrolling: touch; 
+
+        /* Style riêng cho iPhone */
+        #ios-guide .guide-arrow {
+            position: absolute; top: 10px; right: 20px; width: 60px; height: auto; animation: bounce 1s infinite;
         }
+        
+        /* Style cho Android (nếu lỡ ko tự chuyển được thì hiện nút này) */
+        #android-manual {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        
+        .guide-text { margin-top: 100px; padding: 20px; font-size: 1.1rem; line-height: 1.6; font-weight: 600; }
+        .btn-manual {
+            background: #356854; color: white; padding: 15px 30px; border-radius: 50px;
+            text-decoration: none; font-weight: 700; margin-top: 20px; border: 1px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     </style>
 </head>
 <body>
+
+    <div id="ios-guide" class="guide-overlay">
+        <svg class="guide-arrow" viewBox="0 0 24 24" fill="white">
+            <path d="M12 2L12 22 M12 2L5 9 M12 2L19 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="guide-text">
+            <p>⚠️ iPhone không hỗ trợ mở trên Zalo.</p>
+            <p>Vui lòng nhấn vào dấu <b>(...)</b> ở góc trên bên phải</p>
+            <p>👉 Chọn <b>"Mở bằng trình duyệt"</b> (Safari)</p>
+        </div>
+    </div>
+
+    <div id="android-guide" class="guide-overlay" style="background: #f0f2f5; color: #333;">
+        <div id="android-manual">
+            <h3 style="color: #356854;">KATI STUDIO</h3>
+            <p>Đang chuyển sang trình duyệt...</p>
+            <div style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">Nếu không tự chuyển, vui lòng nhấn nút bên dưới:</div>
+            <a href="#" id="btn-android-link" class="btn-manual">MỞ TRÌNH DUYỆT NGAY 🚀</a>
+        </div>
+    </div>
+
     <iframe 
         id="mainFrame" 
         title="Kati Studio App"
@@ -35,27 +65,59 @@
     ></iframe>
 
     <script>
+        // LINK GOOGLE SCRIPT GỐC CỦA BẠN
         const LINK_GOOGLE_GOC = "https://script.google.com/macros/s/AKfycbwx48cWA84d4e2Iw31ViBpZSo-cNC8YP2UTD0KpOhCV7_WLw2aFwjDdm2mbmm5IkWNb/exec"; 
 
-        function loadApp() {
-            var params = window.location.search; 
+        function init() {
+            var ua = navigator.userAgent;
+            var isZalo = ua.indexOf("Zalo") > -1;
+            var isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            var isAndroid = ua.indexOf("Android") > -1;
             
-            // Logic ghép tham số
+            // Xử lý tham số URL
+            var params = window.location.search; 
             if (!params.includes("page=")) {
                 var prefix = params ? "&" : "?";
                 params += prefix + "page=kyonline";
             }
+            
+            // Link đích đến Google Apps Script
+            var targetGoogleLink = LINK_GOOGLE_GOC + params;
+            
+            // --- XỬ LÝ ZALO ---
+            if (isZalo) {
+                // A. NẾU LÀ ANDROID
+                if (isAndroid) {
+                    // Hiển thị màn hình chờ (để che cái iframe trắng đi)
+                    document.getElementById("android-guide").style.display = "block";
+                    
+                    // Lấy đường dẫn hiện tại (Vercel) nhưng bỏ 'https://'
+                    var currentUrlNoProtocol = window.location.href.replace(/^https?:\/\//, "");
+                    
+                    // [QUAN TRỌNG] Tạo Intent không chỉ định 'package' -> Máy sẽ tự chọn trình duyệt mặc định
+                    // S.browser_fallback_url dùng để phòng hờ nếu intent lỗi
+                    var intentUrl = "intent://" + currentUrlNoProtocol + "#Intent;scheme=https;action=android.intent.action.VIEW;S.browser_fallback_url=" + encodeURIComponent(window.location.href) + ";end";
+                    
+                    // Gán link cho nút bấm thủ công (phòng hờ)
+                    document.getElementById("btn-android-link").href = intentUrl;
 
-            var finalLink = LINK_GOOGLE_GOC + params;
-            
-            // Log ra để kiểm tra nếu cần
-            console.log("Loading URL:", finalLink);
-            
-            document.getElementById("mainFrame").src = finalLink;
+                    // Tự động kích hoạt chuyển hướng
+                    window.location.href = intentUrl;
+                    return; 
+                }
+                
+                // B. NẾU LÀ IPHONE
+                if (isIOS) {
+                    document.getElementById("ios-guide").style.display = "block";
+                    return;
+                }
+            }
+
+            // --- KHÔNG PHẢI ZALO (CHẠY BÌNH THƯỜNG) ---
+            document.getElementById("mainFrame").src = targetGoogleLink;
         }
 
-        // Chạy ngay lập tức
-        loadApp();
+        init();
     </script>
 </body>
 </html>
