@@ -3,42 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KATI STUDIO - HỆ THỐNG KÝ ONLINE</title>
+    <title>KATI STUDIO - KÝ HỢP ĐỒNG ONLINE</title>
+    
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="shortcut icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <style>
-        /* Thiết lập tràn màn hình, không có viền */
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #f0f2f5; }
-        iframe { width: 100%; height: 100%; border: none; display: block; }
+        /* Thiết lập tràn màn hình, sửa lỗi iPhone */
+        html, body { 
+            margin: 0; padding: 0; 
+            width: 100%; height: 100%; 
+            overflow: hidden; 
+            background-color: #f0f2f5; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Logo nằm giữa màn hình lúc chờ */
+        .startup-logo {
+            width: 100px; 
+            height: auto;
+            object-fit: contain;
+            opacity: 0.8;
+            animation: pulse 2s infinite ease-in-out;
+            z-index: 1; 
+        }
+
+        /* Hiệu ứng logo thở */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        
+        iframe { 
+            width: 100%; height: 100%; border: none; 
+            display: block; position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 10; 
+        }
     </style>
 </head>
 <body>
-    <iframe id="mainFrame" title="Kati Studio App"></iframe>
+
+    <img src="logo.png" alt="KATI STUDIO" class="startup-logo">
+
+    <iframe 
+        id="mainFrame" 
+        title="Kati Studio App"
+        sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation"
+        allow="camera; microphone; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    ></iframe>
 
     <script>
-        // =======================================================================
-        // 🔴 QUAN TRỌNG: DÁN LINK GOOGLE CỦA BẠN VÀO GIỮA 2 DẤU NHÁY DƯỚI ĐÂY
-        // Link phải có đuôi /exec
-        // =======================================================================
+        // LINK GOOGLE GỐC CỦA BẠN
         const LINK_GOOGLE_GOC = "https://script.google.com/macros/s/AKfycbwx48cWA84d4e2Iw31ViBpZSo-cNC8YP2UTD0KpOhCV7_WLw2aFwjDdm2mbmm5IkWNb/exec"; 
-        // =======================================================================
 
-        // Logic giữ nguyên tham số URL (stt, thang, key, page...)
-        // Giúp link Vercel hoạt động y hệt link Google
         function loadApp() {
-            // Lấy toàn bộ tham số sau dấu ? của link Vercel (VD: ?page=kyonline&stt=1...)
             var params = window.location.search; 
-            
-            // Nếu link Vercel chưa có tham số page, ta có thể tự thêm mặc định là kyonline
-            // (Tùy chọn: Nếu bạn muốn link gốc vào thẳng trang ký luôn)
             if (!params.includes("page=")) {
                 var prefix = params ? "&" : "?";
                 params += prefix + "page=kyonline";
             }
-
-            // Gán link hoàn chỉnh vào Iframe
-            var finalLink = LINK_GOOGLE_GOC + params;
-            document.getElementById("mainFrame").src = finalLink;
+            // Thêm timestamp để ép Zalo tải mới
+            var timestamp = "&t=" + new Date().getTime();
+            document.getElementById("mainFrame").src = LINK_GOOGLE_GOC + params + timestamp;
         }
-
         loadApp();
     </script>
 </body>
